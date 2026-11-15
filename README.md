@@ -1,10 +1,12 @@
 # ByteBloom
 
-**Every file has a hidden beauty.**
+![ByteBloom v0.1.0 launch artwork with a luminous blue bloom beside the tagline “Every file has a hidden beauty.”](docs/assets/bytebloom-launch-hero.png)
 
 ByteBloom v0.1.0 is a native macOS application that turns a file's complete binary
 contents into deterministic, luminous botanical artwork. All processing
 happens locally with Apple frameworks and no third-party dependencies.
+
+![ByteBloom running on macOS, showing a jade bloom generated from sample.txt and controls to choose another file, explore its bytes, or export a PNG.](docs/assets/bytebloom-macos-screenshot.jpg)
 
 ## How it works
 
