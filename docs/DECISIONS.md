@@ -137,3 +137,18 @@ they materially affect the product or architecture.
 - docs/VERIFICATION.md separates actual signed-app interactions, automated
   checks, and outstanding owner acceptance items. The frozen generator and
   renderer remain byte-for-byte unchanged from aa373d1.
+
+### Focused layout/accessibility hardening
+
+The owner provisionally accepted core functionality and authorized a focused
+presentation correction. The frozen `bloom-v1` mapping and renderer remain
+unchanged. One scroll area provides overflow below fixed primary controls;
+intrinsic-size adaptive statistics replace the fixed horizontal row. Native
+text styles, labeled artwork, explicit metric/histogram accessibility values,
+and AppKit feedback announcements improve semantics without changing file
+access or processing state. The minimum content size remains 820 × 720.
+
+The repository retains the Xcode 27+ JSON `.xcproj` format and macOS 14.0
+deployment target. README distinguishes the build Mac/Xcode requirements
+from unverified macOS 14 runtime compatibility. Final owner review, repository
+visibility changes, merges, and publication remain separate gates.

@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct ContentView: View {
     @Bindable var model: BloomModel
@@ -12,18 +13,27 @@ struct ContentView: View {
             header
             if let message = model.message { notice(message) }
             if model.isBusy { progress }
-            if let result = model.result {
-                artwork(result.preview)
-                    .padding(.horizontal, 28)
-                    .padding(.top, 8)
-                resultFooter(result)
-            } else {
-                welcome
+            GeometryReader { viewport in
+                ScrollView {
+                    VStack(spacing: 20) {
+                        if let result = model.result {
+                            artwork(result.preview, description: "Botanical bloom in \(BloomRenderer.palettes[result.parameters.palette].name), generated from the selected file. Three layers of curved petals surround a luminous seed core.")
+                                .frame(width: artSize(in: viewport.size), height: artSize(in: viewport.size))
+                                .frame(maxWidth: .infinity)
+                            resultFooter(result)
+                        } else {
+                            welcome(width: viewport.size.width - 64)
+                        }
+                        Text("LOCAL BY DESIGN · YOUR FILE STAYS UNCHANGED")
+                            .font(.caption).tracking(1)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.horizontal, 32).padding(.vertical, 16)
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: viewport.size.height)
+                }
             }
-            Text("LOCAL BY DESIGN  ·  YOUR FILE STAYS UNCHANGED")
-                .font(.system(size: 9, weight: .medium)).tracking(1.8)
-                .foregroundStyle(.secondary.opacity(0.65))
-                .padding(.bottom, 16).padding(.top, 12)
         }
         .background(background)
         .overlay {
@@ -48,17 +58,48 @@ struct ContentView: View {
         .preferredColorScheme(.dark)
         .tint(accent)
         .task { await model.loadDemonstration() }
+        .onChange(of: model.message) { _, message in
+            if let message { announce(message) }
+        }
+        .onChange(of: model.phase) { previous, phase in
+            if previous == .rendering, phase == .idle, model.result != nil, model.message == nil {
+                announce("Your bloom is ready. Explore the Bytes and Export PNG are available.")
+            }
+        }
+    }
+
+    private func announce(_ text: String) {
+        NSAccessibility.post(element: NSApplication.shared, notification: .announcementRequested,
+                             userInfo: [.announcement: text, .priority: NSAccessibilityPriorityLevel.high.rawValue])
+    }
+
+    // Size against the actual content viewport, not the window frame/title bar.
+    // Details scroll instead of squeezing the square artwork or hiding controls.
+    private func artSize(in viewport: CGSize) -> CGFloat {
+        min(viewport.width - 64, max(340, min(600, viewport.height - 160)))
     }
 
     private var header: some View {
-        HStack(alignment: .center) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text("BYTEBLOOM").font(.system(size: 15, weight: .semibold)).tracking(3)
-                if model.result != nil {
-                    Text("Every file has a hidden beauty.").font(.system(size: 12)).foregroundStyle(.secondary)
-                }
+        ViewThatFits(in: .horizontal) {
+            HStack { branding; Spacer(minLength: 24); headerActions }
+            VStack(alignment: .leading, spacing: 12) { branding; headerActions }
+        }
+        .controlSize(.large)
+        .padding(.horizontal, 32).padding(.vertical, 18)
+    }
+
+    private var branding: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text("BYTEBLOOM").font(.headline).tracking(3)
+            if model.result != nil {
+                Text("Every file has a hidden beauty.").font(.subheadline).foregroundStyle(.secondary)
             }
-            Spacer()
+        }
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private var headerActions: some View {
+        HStack {
             if model.result != nil {
                 Button(action: model.chooseFile) { Label("Choose Another File", systemImage: "doc.badge.plus") }
                     .disabled(!model.canImport)
@@ -67,74 +108,67 @@ struct ContentView: View {
                     .disabled(model.isBusy || model.isPanelPresented)
             }
         }
-        .controlSize(.large)
-        .padding(.horizontal, 32).padding(.vertical, 18)
+        .fixedSize()
     }
 
-    private var welcome: some View {
-        HStack(spacing: 4) {
-            VStack(alignment: .leading, spacing: 22) {
-                Text("Every file has\na hidden beauty.")
-                    .font(.system(size: 37, weight: .regular, design: .serif))
-                    .fixedSize(horizontal: false, vertical: true)
-                Text("Turn the bytes of a file into\na luminous botanical artwork.")
-                    .font(.system(size: 15)).foregroundStyle(.secondary).lineSpacing(5)
-                VStack(alignment: .leading, spacing: 14) {
-                    Label("Drop a file anywhere", systemImage: "arrow.down.doc")
-                        .font(.system(size: 15, weight: .medium))
-                    Button("Choose a File…", action: model.chooseFile)
-                        .buttonStyle(.borderedProminent).controlSize(.large)
-                        .disabled(!model.canImport)
-                    Text("One local file · up to 512 MiB")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-                .padding(20)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(.white.opacity(0.035), in: RoundedRectangle(cornerRadius: 14))
-                .overlay { RoundedRectangle(cornerRadius: 14).stroke(.white.opacity(0.10)) }
+    @ViewBuilder private func welcome(width: CGFloat) -> some View {
+        if width >= 720 {
+            HStack(spacing: 24) {
+                welcomeText.frame(width: 290)
+                demonstration.frame(width: min(560, width - 314))
             }
-            .frame(width: 290).padding(.leading, 38)
-            VStack(spacing: 0) {
-                if let demo = model.demonstration {
-                    artwork(demo)
-                } else {
-                    ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
-                Text("DEMONSTRATION · SYNTHETIC BYTES")
-                    .font(.system(size: 9, weight: .medium)).tracking(1.5)
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.trailing, 12)
+        } else {
+            VStack(spacing: 24) { welcomeText; demonstration.frame(maxWidth: 480) }
         }
-        .padding(.bottom, 24)
-        .frame(maxHeight: .infinity)
     }
 
-    private func artwork(_ image: CGImage) -> some View {
-        Image(decorative: image, scale: 1)
+    private var welcomeText: some View {
+        VStack(alignment: .leading, spacing: 22) {
+            Text("Every file has\na hidden beauty.")
+                .font(.system(size: 37, weight: .regular, design: .serif))
+                .fixedSize(horizontal: false, vertical: true)
+            Text("Turn the bytes of a file into\na luminous botanical artwork.")
+                .font(.body).foregroundStyle(.secondary).lineSpacing(5)
+            VStack(alignment: .leading, spacing: 14) {
+                Label("Drop a file anywhere", systemImage: "arrow.down.doc")
+                    .font(.body.weight(.medium))
+                Button("Choose a File…", action: model.chooseFile)
+                    .buttonStyle(.borderedProminent).controlSize(.large)
+                    .disabled(!model.canImport)
+                Text("One local file · up to 512 MiB")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            .padding(20)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.white.opacity(0.035), in: RoundedRectangle(cornerRadius: 14))
+            .overlay { RoundedRectangle(cornerRadius: 14).stroke(.white.opacity(0.10)) }
+        }
+    }
+
+    private var demonstration: some View {
+        VStack(spacing: 0) {
+            if let demo = model.demonstration {
+                artwork(demo, description: "Demonstration botanical bloom from fixed synthetic bytes, not a selected file.")
+            } else {
+                ProgressView().frame(height: 360)
+            }
+            Text("DEMONSTRATION · SYNTHETIC BYTES")
+                .font(.caption).tracking(1)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+    }
+
+    private func artwork(_ image: CGImage, description: String) -> some View {
+        Image(image, scale: 1, label: Text(description))
             .resizable().interpolation(.high).scaledToFit()
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .accessibilityLabel(model.result == nil ? "Demonstration botanical bloom" : "Botanical bloom generated from the selected file")
-            .accessibilityHidden(false)
     }
 
     private func resultFooter(_ result: BloomResult) -> some View {
         VStack(spacing: 14) {
-            HStack {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(result.file.source.url.lastPathComponent)
-                        .font(.system(size: 17, weight: .medium)).lineLimit(1).truncationMode(.middle)
-                    Text("\(ByteCountFormatter.string(fromByteCount: Int64(result.file.analysis.byteCount), countStyle: .binary))  ·  \(BloomRenderer.palettes[result.parameters.palette].name)  ·  bloom-v1")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-                Spacer(minLength: 16)
-                Button {
-                    exploring.toggle()
-                } label: {
-                    Label("Explore the Bytes", systemImage: exploring ? "chevron.up" : "chevron.down")
-                }
-                .buttonStyle(.plain).foregroundStyle(accent)
-                .accessibilityValue(exploring ? "Expanded" : "Collapsed")
+            ViewThatFits(in: .horizontal) {
+                HStack { resultSummary(result); Spacer(minLength: 24); exploreButton }
+                VStack(alignment: .leading, spacing: 12) { resultSummary(result); exploreButton }
             }
             if exploring {
                 ByteDetails(analysis: result.file.analysis, copy: model.copyFingerprint)
@@ -142,14 +176,33 @@ struct ContentView: View {
                     .background(.white.opacity(0.035), in: RoundedRectangle(cornerRadius: 12))
             }
         }
-        .padding(.horizontal, 36).padding(.top, 12)
+    }
+
+    private func resultSummary(_ result: BloomResult) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(result.file.source.url.lastPathComponent)
+                .font(.title3.weight(.medium)).lineLimit(2).truncationMode(.middle)
+            Text("\(ByteCountFormatter.string(fromByteCount: Int64(result.file.analysis.byteCount), countStyle: .binary))  ·  \(BloomRenderer.palettes[result.parameters.palette].name)  ·  bloom-v1")
+                .font(.caption).foregroundStyle(.secondary)
+        }
+    }
+
+    private var exploreButton: some View {
+        Button {
+            exploring.toggle()
+        } label: {
+            Label("Explore the Bytes", systemImage: exploring ? "chevron.up" : "chevron.down")
+        }
+        .foregroundStyle(accent).fixedSize()
+        .accessibilityValue(exploring ? "Expanded" : "Collapsed")
+        .accessibilityHint("Shows or hides file size, entropy, fingerprint, and byte frequencies.")
     }
 
     private var progress: some View {
         HStack(spacing: 14) {
             ProgressView().controlSize(.small)
             VStack(alignment: .leading, spacing: 3) {
-                Text(progressTitle).font(.system(size: 13, weight: .medium))
+                Text(progressTitle).font(.body.weight(.medium))
                 if model.phase == .analyzing {
                     Text("\(ByteCountFormatter.string(fromByteCount: Int64(model.bytesRead), countStyle: .binary)) read · \(model.importingName)")
                         .font(.caption).foregroundStyle(.secondary).lineLimit(1)
@@ -177,10 +230,11 @@ struct ContentView: View {
         HStack(spacing: 10) {
             Image(systemName: model.isError ? "exclamationmark.circle" : "checkmark.circle")
                 .foregroundStyle(model.isError ? Color.orange : accent)
-            Text(text).font(.system(size: 13)).fixedSize(horizontal: false, vertical: true)
+                .accessibilityHidden(true)
+            Text(text).font(.body).fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 8)
             Button(action: model.dismissMessage) { Image(systemName: "xmark") }
-                .buttonStyle(.plain).accessibilityLabel("Dismiss message")
+                .accessibilityLabel("Dismiss message")
         }
         .padding(14).background(.white.opacity(0.045), in: RoundedRectangle(cornerRadius: 10))
         .padding(.horizontal, 32).padding(.bottom, 8)
@@ -195,26 +249,19 @@ private struct ByteDetails: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top, spacing: 28) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("FILE SIZE").font(.system(size: 9, weight: .medium)).tracking(1.3).foregroundStyle(.secondary)
-                    Text("\(analysis.byteCount.formatted()) bytes").font(.system(size: 13).monospacedDigit()).textSelection(.enabled)
-                }
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("SHANNON ENTROPY").font(.system(size: 9, weight: .medium)).tracking(1.3).foregroundStyle(.secondary)
-                    Text(String(format: "%.4f / 8 bits per byte", analysis.entropy)).font(.system(size: 13).monospacedDigit())
-                }
-                Spacer(minLength: 0)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("SHA-256").font(.system(size: 9, weight: .medium)).tracking(1.3).foregroundStyle(.secondary)
-                    HStack {
-                        Text(String(analysis.fingerprint.prefix(12)) + "…" + analysis.fingerprint.suffix(8))
-                            .font(.system(size: 12, design: .monospaced))
-                        Button(action: copy) { Image(systemName: "doc.on.doc") }
-                            .buttonStyle(.plain).help("Copy full SHA-256 fingerprint")
-                            .accessibilityLabel("Copy full SHA-256 fingerprint")
+        VStack(alignment: .leading, spacing: 18) {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .top, spacing: 28) {
+                    sizeAndEntropy
+                    Spacer(minLength: 0)
+                    fingerprint
+                }.fixedSize(horizontal: true, vertical: false)
+                VStack(alignment: .leading, spacing: 16) {
+                    ViewThatFits(in: .horizontal) {
+                        HStack(alignment: .top, spacing: 28) { sizeAndEntropy }.fixedSize()
+                        VStack(alignment: .leading, spacing: 16) { sizeAndEntropy }
                     }
+                    fingerprint
                 }
             }
             HStack(alignment: .bottom, spacing: 6) {
@@ -224,8 +271,21 @@ private struct ByteDetails: View {
                         .frame(height: bins[index] == 0 ? 0 : max(2, 44 * Double(bins[index]) / Double(max(1, bins.max() ?? 1))))
                         .frame(maxWidth: .infinity, maxHeight: 44, alignment: .bottom)
                         .help(String(format: "%02X–%02X: %@ bytes", index * 16, index * 16 + 15, bins[index].formatted()))
-                        .accessibilityLabel("Byte values \(index * 16) through \(index * 16 + 15): \(bins[index]) occurrences")
                 }
+            }
+            // Virtual text children include zero-height bins, which otherwise have
+            // no reliable accessibility hit area. Values are counts, not chart heights.
+            .accessibilityRepresentation {
+                VStack(alignment: .leading) {
+                    ForEach(0..<16, id: \.self) { index in
+                        Text("Byte values \(index * 16) through \(index * 16 + 15): \(bins[index].formatted()) occurrences")
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel("Byte values \(index * 16) through \(index * 16 + 15)")
+                            .accessibilityValue("\(bins[index].formatted()) occurrences")
+                    }
+                }
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel("Byte frequency histogram. 16 groups of consecutive byte values.")
             }
             HStack {
                 Text("00")
@@ -233,9 +293,39 @@ private struct ByteDetails: View {
                 Text("BYTE FREQUENCY · 16 GROUPS")
                 Spacer()
                 Text("FF")
-            }.font(.system(size: 9, design: .monospaced)).foregroundStyle(.secondary)
+            }.font(.caption.monospaced()).foregroundStyle(.secondary)
+                .accessibilityHidden(true)
             Text("Entropy measures byte-value distribution, not randomness, compression, encryption, malware, or security.")
-                .font(.system(size: 11)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    @ViewBuilder private var sizeAndEntropy: some View {
+        metric("FILE SIZE", value: "\(analysis.byteCount.formatted()) bytes")
+        metric("SHANNON ENTROPY", value: String(format: "%.4f / 8 bits per byte", analysis.entropy))
+    }
+
+    private func metric(_ title: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(title).font(.caption.weight(.medium)).tracking(1).foregroundStyle(.secondary)
+            Text(value).font(.body.monospacedDigit()).textSelection(.enabled)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
+        .accessibilityValue(value)
+    }
+
+    private var fingerprint: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text("SHA-256").font(.caption.weight(.medium)).tracking(1).foregroundStyle(.secondary)
+            HStack {
+                Text(String(analysis.fingerprint.prefix(12)) + "…" + analysis.fingerprint.suffix(8))
+                    .font(.body.monospaced())
+                    .accessibilityLabel("Abbreviated SHA-256: \(analysis.fingerprint.prefix(12)) through \(analysis.fingerprint.suffix(8))")
+                Button(action: copy) { Image(systemName: "doc.on.doc") }
+                    .help("Copy full SHA-256 fingerprint")
+                    .accessibilityLabel("Copy full SHA-256 fingerprint")
+            }
         }
     }
 }

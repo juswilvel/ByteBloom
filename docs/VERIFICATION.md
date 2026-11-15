@@ -1,6 +1,7 @@
 # v0.1.0 release-candidate verification
 
-Status: private release candidate, pending owner evaluation. No release,
+Status: private release candidate. The owner provisionally accepted core
+functionality; final layout/accessibility acceptance remains pending. No release,
 publication, merge to main, or visibility change is authorized.
 
 ## Baseline and frozen artwork
@@ -9,7 +10,7 @@ Owner-accepted artwork and `bloom-v1` parameter mapping: `aa373d1`.
 The generator and renderer source files are unchanged from that commit.
 The app preview and export use those same production components.
 
-## Executed automated checks
+## Original integration checks (November 14, 2026)
 
 - Xcode Debug build and tests with signing disabled: 23 tests passed during
   integration (before the additional unreadable-file check).
@@ -53,20 +54,101 @@ Only generated synthetic files were used.
 | Attached native sheets | Final import/save sheet focus, successful export, and cancel rechecked after the panel attachment fix |
 | Source integrity | Synthetic input checksums unchanged after these interactions |
 
+## Layout and accessibility hardening (November 15, 2026)
+
+The owner reports successful manual testing of Finder drag-and-drop, picker,
+byte exploration/copying, export, picker/save cancellation, error recovery,
+and in-flight cancellation/replacement. These are owner-reported passes for
+the preceding candidate, not newly automated UI passes.
+
+Only `ContentView.swift` changes application behavior in this refinement.
+The header, notice, and cancellation controls stay above one vertical scroll
+area. Artwork keeps its square aspect ratio and a bounded viewport-relative
+size; expanded details scroll rather than squeezing it. Statistics use
+`ViewThatFits` to move the fingerprint below size/entropy, then stack the
+remaining metrics if needed. Native text styles replace small fixed text.
+The configured 820 × 720 minimum content size is unchanged.
+
+Artwork now uses a labeled `Image` initializer, not `Image(decorative:)`.
+The disclosure exposes Expanded/Collapsed, Copy and Dismiss have names,
+metrics expose labels and values, and all 16 histogram groups (including
+zero counts) have separate accessibility elements. AppKit announcements
+request feedback for errors, cancellation, copying, saves, and completed
+imports. No accessibility package or additional framework was introduced.
+
+### Executed layout matrix
+
+Actual running, ad-hoc signed, sandbox-enabled application windows were
+examined using only synthetic inputs. Each size was checked in welcome and
+result states, with a notice, and with details collapsed and expanded.
+Screenshots of expanded content include the scrolled position; the artwork
+above the viewport is naturally scrolled out, not distorted or clipped by
+its image container. Header controls remain visible.
+
+| Requested size | Observed outer window (points) | Usable content (points) |
+|---|---|---|
+| Minimum 820 × 720 | 820 × 752 | 820 × 720 |
+| Default 1000 × 850 | 1000 × 850 | 1000 × 818 |
+| Large 1280 × 900 | 1280 × 900 | 1280 × 868 |
+
+The 32-point title bar explains the difference. Captures are at 2× Retina
+resolution. Window restoration interfered with exact sizing, so temporary
+copies outside the repository used isolated bundle identifiers and only
+changed the initial window size. They run the same application views,
+model, analyzer, renderer, file access, and sandbox entitlements. No test
+launch configuration is committed. The canonical build was also launched
+and its final accessibility tree, import, and export checked directly.
+
+A separate temporary minimum-size stress build increased presentation text
+to 17–24 points (roughly 150%) without changing layout geometry. Its
+statistics successfully moved to two rows, and explanatory text wrapped.
+This is a layout stress test, not evidence of automatic macOS reading-size
+support: System Settings lists supported apps, and ByteBloom is not listed.
+
+### Accessibility and regression checklist
+
+| Check | Evidence / outcome |
+|---|---|
+| Full Keyboard Access | Enabled in System Settings for testing; original off state restored |
+| Tab order | Choose Another File → Export → Dismiss when present → Explore → Copy; reverse navigation exercised |
+| Space activation | Welcome picker, Export, Explore, Copy, and Dismiss exercised successfully |
+| Native dialogs | Keyboard-only path entry/import and PNG save; Escape canceled save successfully |
+| Focus indicators | Focus targets verified through accessibility state; the system focus overlay is not captured reliably by the app-only screenshot tool, so visual confirmation remains manual |
+| Artwork semantics | Image role and botanical/demo description present in the final accessibility tree |
+| Disclosure and copy | Expanded/Collapsed value and full-fingerprint action name inspected |
+| Statistics/histogram | Exact metric values and 16 individually labeled count elements inspected, including zero bins |
+| Error/completion feedback | Visible and accessible text verified; native announcement requests implemented |
+| VoiceOver | Enable/disable attempted through System Settings; the control interface could not verify an active spoken/caption session. Spoken output and announcement timing are **not marked passed**. Original off state restored |
+| Enlarged text | Temporary font stress build passed at minimum width; not a global text-size support claim |
+| Import/error/export | Synthetic imports, empty-file recovery, full fingerprint copy, native PNG export, and save cancellation rechecked |
+| Finder drag regression | Two cross-window attempts through the control interface did not complete. Owner's preceding manual pass is retained; this refinement needs a brief owner recheck |
+
+Final signed Debug build/test: **24 tests, zero failures**. Existing analyzer,
+generator, renderer, file-access, cancellation, replacement, and export tests
+are retained. No new state behavior was introduced that requires a separate
+unit test; native layout/accessibility checks supplement the existing suite.
+Xcode injects temporary filesystem and testmanager permissions into its test
+host. A separate standalone build (without tests) was signature-verified and
+used for native import/export checks; its entitlements contain only sandbox,
+user-selected read/write, and Debug get-task-allow. The isolated size-check
+builds also use these normal entitlements. No new
+networking, telemetry, entitlements, dependencies, or project-format changes.
+
+The final UI-exported PNG is 2048 × 2048, opaque sRGB, and byte-for-byte
+identical to the previously accepted export for the same synthetic input:
+`16cf672a81c787598e3ef13ec7c088dc9ccf54dcd0709ec9f54e70494496c2b9`.
+Generator and renderer remain byte-for-byte unchanged from `aa373d1`.
+
 ## Owner checks still required
 
-- **Finder drag-and-drop** is implemented through SwiftUI's native URL drop
-  destination, but a cross-window drag was not successfully exercised by the
-  computer-control interface. Verify one file, multiple files, and a directory.
-- **Manual in-flight cancellation and rapid replacement**: automated tests pass.
-  The 512 MiB UI import completed before the control tool could click Cancel;
-  do not interpret this as a manual cancellation pass.
-- Exercise permission-denied recovery, Finder aliases, nonlocal/cloud-provider
-  files, and removable volumes in representative real use. Unit tests cover
-  unreadable files and aliases; provider-specific UI behavior remains unverified.
-- Evaluate keyboard/VoiceOver behavior, small-window layout, and overall product
-  polish. Check the minimum supported macOS version on actual macOS 14 hardware/VM.
-- Final owner release-candidate acceptance, and any later publication, are separate.
+- Listen with VoiceOver to the artwork description, disclosure state, all
+  histogram groups, and error/save/copy announcements; inspect focus visibility.
+- Briefly recheck Finder drag-and-drop after the scrolling/layout change.
+- Evaluate final product polish and representative keyboard use. A complete
+  assistive-technology usability audit is not claimed.
+- Provider/removable-volume behavior and actual macOS 14 runtime compatibility
+  remain unverified; the deployment target alone does not prove compatibility.
+- Final owner release acceptance and publication remain separate approvals.
 
 ## Reproducible owner walkthrough
 

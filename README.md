@@ -25,8 +25,10 @@ publication and final release acceptance require separate owner approval.
 3. Watch analysis progress or cancel. Selecting another file cancels prior
    analysis. Failed or canceled imports preserve the previous successful bloom.
 4. Open **Explore the Bytes** for exact size, Shannon entropy, a 16-bin byte
-   histogram, and the SHA-256 fingerprint. The copy button copies all 64 hex
-   characters.
+   histogram, and the SHA-256 fingerprint. Details scroll when space is tight;
+   statistics adapt to the available width. The copy button copies all 64 hex
+   characters. With Full Keyboard Access enabled, use Tab/Shift-Tab to move
+   among controls and Space to activate them.
 5. Choose **Export PNG…** (`⇧⌘S`). The native save dialog defaults to
    `ByteBloom.png`. Output is an opaque, sRGB, 2048 × 2048 PNG using the same
    normalized composition as the preview. Existing unrelated files require
@@ -39,8 +41,13 @@ are recoverable and the bloom remains available for another attempt.
 
 ## Build and run
 
-Requires full Xcode on macOS. The project targets **macOS 14.0 or newer**, uses
-Swift 6, and is verified with Xcode 27.2 / Swift compiler 6.4.2 on macOS 27.2.1.
+The configured application deployment target is **macOS 14.0**. Runtime
+compatibility on macOS 14 has not yet been independently verified.
+
+The current JSON `project.xcproj` format requires **Xcode 27 or later**.
+**Xcode 27.2 requires macOS 26.6 or later on the build Mac**; this build-host
+requirement is separate from the application deployment target. Development
+is verified with Xcode 27.2 / Swift compiler 6.4.2 on macOS 27.2.1, using Swift 6.
 There are no package installation or service setup steps.
 
 While the repository is private, cloning requires authorized GitHub access:
