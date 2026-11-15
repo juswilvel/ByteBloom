@@ -11,11 +11,17 @@ statistics, and export the result as a high-quality PNG.
 
 ## Project status
 
-**Foundation bootstrapped. v0.1.0 is not implemented yet.**
+**Core pipeline implemented. Six-sample artwork review pending.**
 
-The current Xcode project contains a minimal placeholder
-application and a test target. File analysis, bloom rendering,
-import interaction, and PNG export are upcoming features.
+The application still presents the foundation placeholder. The
+streaming analyzer, read-only file-access boundary, deterministic
+`bloom-v1` parameter generator, and native Core Graphics renderer
+are implemented and tested. Preview and 2048-pixel rendering use
+the same normalized geometry.
+
+The six-sample gallery must receive explicit owner approval before
+the full SwiftUI import workflow and native PNG export integration
+proceed. This is not a completed v0.1.0 application or public release.
 
 The initial public release will provide source code and
 documented build instructions. A prebuilt Mac app is deferred.
@@ -59,6 +65,28 @@ Or verify compilation from Terminal:
 The command above verifies compilation without code signing.
 Running the sandboxed application may require appropriate
 development signing configuration.
+
+Run the core tests on macOS:
+
+    xcodebuild \
+      -project ByteBloom.xcodeproj \
+      -scheme ByteBloom \
+      -configuration Debug \
+      -destination 'platform=macOS' \
+      CODE_SIGNING_ALLOWED=NO \
+      test
+
+Tests cover SHA-256 reference vectors, byte counts and entropy,
+chunk-boundary consistency, cancellation, file eligibility and
+change detection, SplitMix64 and numerical mapping golden values,
+render repeatability, PNG color/opacity, and normalized composition.
+Tests use generated synthetic data, never personal source files.
+
+`BloomGeneratorV1.swift` documents numerical mappings, digest byte
+ordering, seed derivation, and PRNG consumption. The candidate v1
+mapping is regression-tested but awaits the visual acceptance gate
+before being declared stable. Rasterized pixels and PNG encoding
+are not guaranteed identical across operating-system versions.
 
 ## Design and documentation
 

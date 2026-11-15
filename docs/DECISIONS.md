@@ -48,8 +48,28 @@ or material scope change without owner approval.
 
 ## Current phase
 
-Foundation bootstrap only. Application feature implementation
-requires separate authorization.
+The owner's implementation kickoff authorized Phases A–D on
+November 14, 2026. Binary analysis, deterministic parameters, and
+the Core Graphics renderer are implemented on the feature branch.
+The six-sample gallery is generated; explicit owner visual acceptance
+is pending. Full UI and export integration remain gated by that review.
+
+### Implementation checkpoint: Phases A–D
+
+- FileAccess owns eligibility checks, security scope, read-only handle
+  lifetime, and a cancellable detached worker. BinaryAnalyzer owns
+  one-pass chunked measurements and does not import graphics or UI.
+- Candidate `bloom-v1` uses four big-endian UInt64 digest words XORed
+  into a fixed SplitMix64 seed. Precise mappings and consumption order
+  are documented in `BloomGeneratorV1.swift` and covered by golden tests.
+- BloomRenderer draws only normalized geometry into an opaque sRGB
+  bitmap, with one rendering implementation for previews and 2048-pixel
+  artwork. No additional application or framework target was added.
+- A temporary Swift harness outside the repository generated six safe
+  fixtures, PNG previews, full-size PNGs, a labeled contact sheet, and
+  measured/derived parameter summaries. Generated artifacts are untracked.
+- Mapping stability and artistic acceptance are pending owner review;
+  passing technical tests does not constitute visual approval.
 
 Public visibility and v0.1.0 release require separate
 explicit approval.
