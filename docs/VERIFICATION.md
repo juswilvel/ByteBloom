@@ -1,9 +1,11 @@
-# v0.1.0 release-candidate verification
+# v0.1.0 verification
 
-Status: private v0.1.0 release candidate at the merge-authorization checkpoint.
-The final source review passed, and the owner completed the manual checks below.
-The tested application revision is `b2a7080`. This documentation update does not
-change the application, project configuration, or tests.
+The owner accepted the final release candidate after the source review and
+manual checks below. Private `main` was fast-forwarded to `f45cdda`. At that
+revision, the signed standalone Debug build passed signature and App Sandbox
+checks and reported version 0.1.0, build 1. The complete Xcode suite passed
+with **24 tests and zero failures**. The runtime observations below cover
+the same application code.
 
 ## Baseline and frozen artwork
 

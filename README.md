@@ -2,19 +2,9 @@
 
 **Every file has a hidden beauty.**
 
-ByteBloom is a native macOS application that turns a file's complete binary
+ByteBloom v0.1.0 is a native macOS application that turns a file's complete binary
 contents into deterministic, luminous botanical artwork. All processing
 happens locally with Apple frameworks and no third-party dependencies.
-
-## Status
-
-**v0.1.0 release candidate — private pre-merge review, not released.**
-
-The native import, analysis, artwork, byte exploration, and PNG export
-workflow is implemented. The owner accepted the refined six-sample artwork
-and froze `bloom-v1` at commit `aa373d1`. The repository remains private;
-the final source review and owner manual checks have passed. A private merge
-and public source release require separate owner authorization.
 
 ## Use ByteBloom
 
@@ -51,12 +41,11 @@ requirement is separate from the application deployment target. Development
 is verified with Xcode 27.2 / Swift compiler 6.4.2 on macOS 27.2.1, using Swift 6.
 There are no package installation or service setup steps.
 
-While the repository is private, cloning requires authorized GitHub access:
+Clone the source from the `main` branch:
 
 ```sh
-git clone https://github.com/juswilvel/ByteBloom.git
+git clone --branch main https://github.com/juswilvel/ByteBloom.git
 cd ByteBloom
-git switch feature/bytebloom-v0.1.0
 ```
 
 Open `ByteBloom.xcodeproj`, select the **ByteBloom** scheme and **My Mac**,
@@ -73,9 +62,8 @@ xcodebuild -project ByteBloom.xcodeproj -scheme ByteBloom \
 open /tmp/ByteBloom-build/Build/Products/Debug/ByteBloom.app
 ```
 
-Ad-hoc signing is for local development. This is not a Developer ID signed,
-notarized, or distributed binary. The planned first public release is source
-code, not a prebuilt app.
+Build ByteBloom from source. Prebuilt and notarized application
+binaries are not included.
 
 ## Tests and review
 
@@ -92,7 +80,7 @@ preview/export composition, active import replacement, result preservation,
 and source protection across hard links, symlinks, and Finder aliases.
 Tests create only synthetic temporary files, including sparse size-limit fixtures.
 
-See [release-candidate verification](docs/VERIFICATION.md) for executed UI
+See [v0.1.0 verification](docs/VERIFICATION.md) for executed UI
 checks, owner-reported manual results, and remaining limitations. macOS 14
 compatibility has not been independently verified.
 
