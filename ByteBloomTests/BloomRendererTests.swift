@@ -71,4 +71,30 @@ final class BloomRendererTests: XCTestCase {
         do { _ = try await worker.value; XCTFail("Expected cancellation") }
         catch { XCTAssertTrue(error is CancellationError) }
     }
+
+    func testLuminousCoreAtThumbnailSizeAcrossPalettes() throws {
+        var checked = Set<Int>()
+        for byte in UInt8(0)..<64 {
+            let p = BloomGeneratorV1.generate(from: try analyzeBytes(Data([byte])))
+            guard checked.insert(p.palette).inserted else { continue }
+            let image = try BloomRenderer.render(p, pixelSize: 128)
+            let pixels = try XCTUnwrap(image.dataProvider?.data as Data?)
+            var core = 0.0, surround = 0.0
+            var coreCount = 0, surroundCount = 0
+            for y in 0..<128 {
+                for x in 0..<128 {
+                    let radius = hypot(Double(x) + 0.5 - 64, Double(y) + 0.5 - 64) / 128
+                    let offset = y * image.bytesPerRow + x * 4
+                    let light = 0.2126 * Double(pixels[offset]) + 0.7152 * Double(pixels[offset + 1])
+                        + 0.0722 * Double(pixels[offset + 2])
+                    if radius < 0.025 { core += light; coreCount += 1 }
+                    if (0.05...0.08).contains(radius) { surround += light; surroundCount += 1 }
+                }
+            }
+            // The compact center must read as a lit focal point, not a dark aperture.
+            XCTAssertGreaterThan(core / Double(coreCount), 100, "Palette \(p.palette)")
+            XCTAssertGreaterThan(core / Double(coreCount), surround / Double(surroundCount), "Palette \(p.palette)")
+        }
+        XCTAssertEqual(checked, Set(0..<4))
+    }
 }

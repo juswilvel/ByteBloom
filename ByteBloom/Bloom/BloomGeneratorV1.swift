@@ -19,6 +19,7 @@ struct BloomParameters: Equatable, Sendable {
         let length: Double
         let width: Double
         let bend: Double
+        let taper: Double
         let veins: Int
         let ridge: Double
     }
@@ -61,6 +62,11 @@ enum BloomGeneratorV1 {
     /// Seed = XOR of the four consecutive 64-bit digest words. PRNG consumption:
     /// each petal: angle, length, width, bend, ridge (5); filament: angle, length,
     /// curl, light (4); mote: angle, radius, size, light (4), in array order.
+    /// Refinement 1 (owner-authorized candidate change): d[4]/255 controls fullness,
+    /// d[5]/255 sweep, d[6]/255 layer spacing, d[7]/255 two-lobed elongation,
+    /// d[8]/255 layer stagger. No extra PRNG draws; seed, palette, count, orientation,
+    /// growth, filaments, and motes keep their original mappings. Petal taper is
+    /// clamped to [0.16, 0.84]; it controls the shoulder's breadth and height.
     static func generate(from analysis: BinaryAnalysis) -> BloomParameters {
         let d = analysis.sha256
         let tau = 2 * Double.pi
@@ -79,20 +85,28 @@ enum BloomGeneratorV1 {
         let mean = frequencies.enumerated().reduce(0.0) { $0 + Double($1.offset) / 255 * $1.element }
         let concentration = frequencies.reduce(0.0) { $0 + $1 * $1 }
         let bands = (0..<16).map { band in frequencies[(band * 16)..<(band * 16 + 16)].reduce(0, +) }
+        let fullness = Double(d[4]) / 255
+        let sweep = Double(d[5]) / 255 - 0.5
+        let spacing = Double(d[6]) / 255
+        let elongation = 0.025 + 0.065 * Double(d[7]) / 255
+        let stagger = tau / Double(count) * (0.18 + 0.64 * Double(d[8]) / 255)
+        let layerScale = [1.0, 0.60 + 0.24 * spacing, 0.37 + 0.14 * (1 - spacing)]
+        let taper = min(0.84, max(0.16, 0.24 + 0.42 * fullness + 0.18 * mean - 0.14 * concentration))
         var petals: [BloomParameters.Petal] = []
         for layer in 0..<3 {
             for index in 0..<count {
                 let band = bands[(index + layer * 5) % 16]
                 let angle = orientation + Double(index) / Double(count) * tau
-                    + Double(layer) * 0.31 + (random.unit() - 0.5) * 0.065
-                let length = [0.385, 0.302, 0.217][layer] * growth * (0.94 + 0.12 * random.unit())
-                let width = length * (0.23 + 0.12 * mean + 0.06 * concentration
-                    + 0.07 * sqrt(band) + 0.035 * random.unit())
-                let bend = (random.unit() - 0.5) * 0.12 + (mean - 0.5) * 0.09
+                    + Double(layer) * stagger + (random.unit() - 0.5) * 0.065
+                let length = 0.385 * layerScale[layer] * growth * (0.94 + 0.12 * random.unit())
+                    * (1 + elongation * cos(2 * (angle - orientation)))
+                let width = length * (0.18 + 0.18 * fullness + 0.10 * concentration
+                    + 0.05 * mean + 0.06 * sqrt(band) + 0.03 * random.unit())
+                let bend = (random.unit() - 0.5) * 0.09 + sweep * 0.30 + (mean - 0.5) * 0.12
                 let ridge = 0.32 + 0.23 * random.unit() + 0.12 * sqrt(band)
                 let veins = 5 + Int((6 * sqrt(band) + 4 * texture).rounded(.down))
                 petals.append(.init(layer: layer, angle: angle, length: length,
-                                    width: width, bend: bend, veins: veins, ridge: ridge))
+                                    width: width, bend: bend, taper: taper, veins: veins, ridge: ridge))
             }
         }
         let filamentCount = 32 + Int((96 * texture).rounded(.down))

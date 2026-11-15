@@ -71,6 +71,35 @@ is pending. Full UI and export integration remain gated by that review.
 - Mapping stability and artistic acceptance are pending owner review;
   passing technical tests does not constitute visual approval.
 
+### Phase D refinement 1: candidate mapping change
+
+The owner accepted the initial technical review but withheld artistic
+approval, authorizing one focused refinement of light, core, silhouette,
+and filament visibility. The direction and single Core Graphics renderer
+are retained. No UI, import, or export-dialog integration is authorized yet.
+
+The still-candidate `bloom-v1` mapping intentionally changes petal length,
+width, bend, taper, and layer angles. Digest bytes 4–8 now control fullness,
+sweep, layer spacing, two-lobed elongation, and stagger. Histogram mean and
+concentration additionally shape breadth, sweep, and taper. Exact bounded
+formulas remain in `BloomGeneratorV1.swift`; independent golden references
+and structural regression checks cover the change. The SHA-256 seed,
+SplitMix64 consumption order, palette selection, principal petal count,
+orientation, growth, filament parameters, and motes retain their mappings.
+
+Directional surface gradients and selective rim light separate the three
+layers. A compact golden-angle seed cluster and short stamens replace the
+dark central aperture. Veins and existing filaments have greater contrast;
+particle and filament counts are unchanged. Lighting uses two gradients
+per petal, with shadow composited into the gradient stops. Expensive
+per-petal radial glow was omitted.
+
+The original six input byte sequences and gallery are preserved. A new
+untracked review directory contains before/after comparisons, seven
+1024-pixel previews and 2048-pixel PNGs (including Moonflower blue), full
+parameter records, test results, and a same-machine rendering comparison.
+Explicit owner visual acceptance remains pending.
+
 Public visibility and v0.1.0 release require separate
 explicit approval.
 

@@ -11,7 +11,7 @@ statistics, and export the result as a high-quality PNG.
 
 ## Project status
 
-**Core pipeline implemented. Six-sample artwork review pending.**
+**Core pipeline implemented. Refined artwork review pending.**
 
 The application still presents the foundation placeholder. The
 streaming analyzer, read-only file-access boundary, deterministic
@@ -22,6 +22,11 @@ the same normalized geometry.
 The six-sample gallery must receive explicit owner approval before
 the full SwiftUI import workflow and native PNG export integration
 proceed. This is not a completed v0.1.0 application or public release.
+
+The first focused artwork refinement adds directional lighting, a luminous
+seed core, clearer filaments, and bounded content-derived shape variation.
+The candidate mapping changes are documented in the decision log; the
+original gallery remains available for comparison during owner review.
 
 The initial public release will provide source code and
 documented build instructions. A prebuilt Mac app is deferred.

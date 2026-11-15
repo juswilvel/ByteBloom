@@ -44,8 +44,8 @@ enum BloomRenderer {
             path.addCurve(to: end,
                           control1: CGPoint(x: -0.07, y: filament.length * 0.40),
                           control2: CGPoint(x: filament.curl * filament.length * 1.65, y: filament.length * 0.78))
-            stroke(context, path, palette.leaf.color(filament.light * 0.12), 0.0017)
-            stroke(context, path, palette.light.color(filament.light * 0.48), 0.00036)
+            stroke(context, path, palette.leaf.color(filament.light * 0.18), 0.0020)
+            stroke(context, path, palette.light.color(filament.light * 0.74), 0.00065)
             context.setFillColor(palette.light.color(filament.light * 0.65))
             context.fillEllipse(in: CGRect(x: end.x - 0.0008, y: end.y - 0.0008, width: 0.0016, height: 0.0016))
             context.restoreGState()
@@ -67,21 +67,33 @@ enum BloomRenderer {
         let length = p.length
         let width = p.width
         let bend = p.bend * length
-        let path = petalPath(length: length, width: width, bend: bend)
+        let path = petalPath(length: length, width: width, bend: bend, taper: p.taper)
         let body = p.layer == 1 ? palette.secondary : palette.leaf
 
-        // Translucent lamina, warm at its base, colored through its body, silver at the tip.
+        // Directional illumination within each lamina, never a blanket bloom glow.
+        // Fold the shadow bed into the gradient stops to avoid another full petal fill.
+        let illumination = [0.72, 0.87, 1.0][p.layer]
+        func surface(_ color: RGB, _ alpha: Double) -> CGColor {
+            let shadow = (0.34 + Double(p.layer) * 0.09) * (1 - alpha)
+            let opacity = alpha + shadow
+            let channels = [16, 8, 0].map { shift in
+                (Double((color.hex >> shift) & 255) * alpha
+                 + Double((palette.background.hex >> shift) & 255) * shadow) / (255 * opacity)
+            }
+            return CGColor(srgbRed: channels[0], green: channels[1], blue: channels[2], alpha: opacity)
+        }
         c.saveGState()
         c.addPath(path)
         c.clip()
-        linear(c, colors: [palette.background.color(0.94), body.color(0.42),
-                           body.color(0.24), palette.light.color(0.17)],
-               locations: [0, 0.36, 0.77, 1],
+        linear(c, colors: [surface(palette.gold, 0.24 * illumination), surface(body, 0.78 * illumination),
+                           surface(body, 0.48 * illumination), surface(palette.light, 0.22)],
+               locations: [0, 0.35, 0.72, 1],
                start: CGPoint(x: 0, y: 0), end: CGPoint(x: bend, y: length))
-        linear(c, colors: [body.color(0), body.color(0.12), palette.light.color(0.08), body.color(0)],
-               locations: [0, 0.42, 0.51, 1],
-               start: CGPoint(x: -width, y: 0), end: CGPoint(x: width, y: 0))
-
+        // Off-center crest and shaded right flank give each petal a folded section.
+        linear(c, colors: [body.color(0.06), palette.light.color(0.42 * illumination),
+                           palette.background.color(0.02), palette.background.color(0.50)],
+               locations: [0, 0.36, 0.52, 1],
+               start: CGPoint(x: -width * 0.72, y: 0), end: CGPoint(x: width * 0.72, y: 0))
         // Fine nested contour ribs suggest folded, translucent plant tissue.
         for index in 1...7 {
             let fraction = Double(index) / 9
@@ -90,7 +102,7 @@ enum BloomRenderer {
             rib.addCurve(to: CGPoint(x: bend, y: length),
                          control1: CGPoint(x: -width * fraction * 0.98, y: length * 0.27),
                          control2: CGPoint(x: -width * fraction * 0.70 + bend, y: length * 0.74))
-            stroke(c, rib, palette.light.color(0.06 + 0.035 * texture), 0.00027)
+            stroke(c, rib, palette.light.color(0.08 + 0.05 * texture), 0.00034)
             let other = CGMutablePath()
             other.move(to: CGPoint(x: 0, y: 0.022))
             other.addCurve(to: CGPoint(x: bend, y: length),
@@ -109,69 +121,88 @@ enum BloomRenderer {
                 branch.addCurve(to: CGPoint(x: spineX + side * spread, y: y + length * 0.075),
                                 control1: CGPoint(x: spineX + side * spread * 0.18, y: y),
                                 control2: CGPoint(x: spineX + side * spread * 0.72, y: y + length * 0.018))
-                stroke(c, branch, palette.light.color(0.17 + 0.10 * p.ridge), 0.00033)
+                stroke(c, branch, palette.light.color(0.25 + 0.14 * p.ridge), 0.00055)
                 // A fine fork breaks up the mechanical appearance of parallel ribs.
                 let fork = CGMutablePath()
                 fork.move(to: CGPoint(x: spineX + side * spread * 0.52, y: y + length * 0.018))
                 fork.addQuadCurve(to: CGPoint(x: spineX + side * spread * 0.91, y: y + length * 0.13),
                                   control: CGPoint(x: spineX + side * spread * 0.64, y: y + length * 0.08))
-                stroke(c, fork, body.color(0.22), 0.00025)
+                stroke(c, fork, palette.light.color(0.18), 0.00035)
             }
         }
         c.restoreGState()
 
-        stroke(c, path, body.color(0.10), 0.0027)
-        stroke(c, path, palette.light.color(0.35 + Double(p.layer) * 0.07), 0.00055)
+        stroke(c, path, body.color(0.16), 0.0022)
+        stroke(c, path, palette.light.color(0.28 + Double(p.layer) * 0.07), 0.00065)
         // Highlight one edge, stopping short of a uniform neon outline.
         let edge = CGMutablePath()
         edge.move(to: CGPoint(x: 0, y: 0.025))
         edge.addCurve(to: CGPoint(x: bend, y: length),
-                      control1: CGPoint(x: -width * 1.05, y: length * 0.36),
-                      control2: CGPoint(x: -width * 0.50 + bend, y: length * 0.83))
-        stroke(c, edge, body.color(0.46), 0.0008)
+                      control1: CGPoint(x: -width * 1.18, y: length * (0.24 + 0.16 * p.taper)),
+                      control2: CGPoint(x: bend - width * (0.20 + 0.80 * p.taper), y: length * (0.70 + 0.22 * p.taper)))
+        stroke(c, edge, body.color(0.23), 0.0024)
+        stroke(c, edge, palette.light.color(0.66 * illumination), 0.0010)
         let spine = CGMutablePath()
         spine.move(to: CGPoint(x: 0, y: 0.026))
         spine.addCurve(to: CGPoint(x: bend, y: length * 0.97),
                        control1: CGPoint(x: -bend * 0.5, y: length * p.ridge),
                        control2: CGPoint(x: bend * 0.3, y: length * 0.73))
-        stroke(c, spine, palette.light.color(0.18), 0.0018)
-        stroke(c, spine, palette.light.color(0.68), 0.00045)
+        stroke(c, spine, palette.light.color(0.22), 0.0020)
+        stroke(c, spine, palette.light.color(0.76), 0.00065)
     }
 
-    private static func petalPath(length: Double, width: Double, bend: Double) -> CGPath {
+    private static func petalPath(length: Double, width: Double, bend: Double, taper: Double) -> CGPath {
         let path = CGMutablePath()
         path.move(to: CGPoint(x: 0, y: 0.025))
         path.addCurve(to: CGPoint(x: bend, y: length),
-                      control1: CGPoint(x: -width * 1.05, y: length * 0.36),
-                      control2: CGPoint(x: -width * 0.50 + bend, y: length * 0.83))
+                      control1: CGPoint(x: -width * 1.18, y: length * (0.24 + 0.16 * taper)),
+                      control2: CGPoint(x: bend - width * (0.20 + 0.80 * taper), y: length * (0.70 + 0.22 * taper)))
         path.addCurve(to: CGPoint(x: 0, y: 0.025),
-                      control1: CGPoint(x: width * 0.30 + bend, y: length * 0.85),
-                      control2: CGPoint(x: width * 1.24, y: length * 0.41))
+                      control1: CGPoint(x: bend + width * (0.14 + 0.66 * taper), y: length * (0.74 + 0.20 * taper)),
+                      control2: CGPoint(x: width * 1.16, y: length * (0.27 + 0.22 * taper)))
         path.closeSubpath()
         return path
     }
 
     private static func drawCenter(_ c: CGContext, _ p: BloomParameters, _ palette: Palette) throws {
         let center = CGPoint(x: 0.5, y: 0.5)
-        radial(c, colors: [palette.gold.color(0.20), palette.gold.color(0)], center: center, radius: 0.105)
+        radial(c, colors: [palette.gold.color(0.42), palette.gold.color(0)], center: center, radius: 0.082)
+        // Short recurved stamens frame the compact seed cluster with warm anthers.
+        for index in 0..<36 {
+            let angle = Double(index) / 36 * 2 * Double.pi + p.orientation
+            let radius = (0.056 + 0.005 * sin(Double(index) * 2.399963229728653)) * p.growth
+            c.saveGState()
+            c.translateBy(x: 0.5, y: 0.5)
+            c.rotate(by: angle)
+            let stem = CGMutablePath()
+            stem.move(to: CGPoint(x: 0, y: 0.025 * p.growth))
+            stem.addCurve(to: CGPoint(x: 0.006, y: radius),
+                          control1: CGPoint(x: -0.010, y: radius * 0.75),
+                          control2: CGPoint(x: 0.010, y: radius * 1.06))
+            stroke(c, stem, palette.gold.color(0.62), 0.00065)
+            c.setFillColor(palette.light.color(0.90))
+            c.fillEllipse(in: CGRect(x: 0.0049, y: radius - 0.0015, width: 0.0022, height: 0.0030))
+            c.restoreGState()
+        }
+        radial(c, colors: [palette.light.color(0.78), palette.gold.color(0)], center: center, radius: 0.044 * p.growth)
         // Golden-angle phyllotaxis: a seed head, not a stack of concentric circles.
         for index in (0..<181).reversed() {
             if index % 24 == 0 { try Task.checkCancellation() }
             let t = Double(index) / 180
             let angle = Double(index) * 2.399963229728653 + p.orientation
-            let radius = 0.052 * sqrt(t) * p.growth
+            let radius = 0.039 * sqrt(t) * p.growth
             let x = 0.5 + cos(angle) * radius
             let y = 0.5 + sin(angle) * radius
-            let size = 0.00115 + 0.0010 * t
+            let size = (0.00155 + 0.00065 * t) * p.growth
             c.saveGState()
             c.translateBy(x: x, y: y)
             c.rotate(by: angle + 0.5)
             let seed = CGRect(x: -size * 0.62, y: -size, width: size * 1.24, height: size * 2.3)
-            c.setFillColor(palette.background.color(0.90))
-            c.fillEllipse(in: seed.insetBy(dx: -0.0005, dy: -0.0005))
-            c.setFillColor(palette.gold.color(0.45 + 0.43 * (1 - t)))
+            c.setFillColor(palette.secondary.color(0.38))
+            c.fillEllipse(in: seed.insetBy(dx: -0.00025, dy: -0.00025))
+            c.setFillColor(palette.gold.color(0.72 + 0.23 * (1 - t)))
             c.fillEllipse(in: seed)
-            c.setStrokeColor(palette.light.color(0.55))
+            c.setStrokeColor(palette.light.color(0.72))
             c.setLineWidth(0.0003)
             c.strokeEllipse(in: seed)
             c.setFillColor(palette.light.color(0.80))
