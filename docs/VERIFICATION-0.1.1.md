@@ -98,8 +98,19 @@ The candidate disk image passed integrity verification. Its app has a valid
 ad-hoc signature, Hardened Runtime, App Sandbox, and user-selected read/write
 access. The binary contains arm64 and x86_64 and declares macOS 14.0.
 
-On macOS 27.2.1 (Apple silicon), a disposable installation from a simulated
-quarantined download was blocked. System Settings displayed **Open Anyway** for
-that copy. Successful first launch through that procedure, subsequent launch,
-and import/export on the quarantined copy must be verified before distribution.
-The earlier local QA launch and export are separate evidence.
+On macOS 27.2.1 (Apple silicon), Gatekeeper blocked the first Finder launch
+of a disposable installation from a simulated quarantined download. System
+Settings offered **Open Anyway**. After the follow-up confirmation, macOS
+required owner authentication. The owner completed it personally.
+
+ByteBloom then showed its welcome window. The synthetic file imported through
+the native picker and the app exported a 2048 × 2048 opaque sRGB PNG that
+matched the accepted reference byte for byte. After quitting, the same
+disposable app launched again from Finder without another warning or
+authentication prompt. macOS kept its quarantine attribute and launched both
+instances through App Translocation. Gatekeeper remained enabled and a
+before/after file manifest confirmed the canonical installation was unchanged.
+
+This validates the disclosed Open Anyway path on the tested host. The DMG
+remains an unpublished candidate pending owner acceptance. macOS 14, Intel
+hardware, and managed-device policies were not tested.
