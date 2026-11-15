@@ -26,6 +26,10 @@ final class BloomModel {
     var isBusy: Bool { phase != .idle }
     var canImport: Bool { phase != .exporting && !isPanelPresented }
 
+    private var presentationWindow: NSWindow? {
+        NSApp.mainWindow ?? NSApp.windows.first { $0.isVisible && $0.canBecomeMain }
+    }
+
     func loadDemonstration() async {
         guard demonstration == nil else { return }
         demonstration = try? await Task.detached(priority: .utility) {
@@ -40,7 +44,7 @@ final class BloomModel {
     }
 
     func chooseFile() {
-        guard canImport else { return }
+        guard canImport, let window = presentationWindow else { return }
         let panel = NSOpenPanel()
         panel.title = "Choose a file to bloom"
         panel.prompt = "Create Bloom"
@@ -50,7 +54,7 @@ final class BloomModel {
         panel.allowsMultipleSelection = false
         panel.resolvesAliases = false
         isPanelPresented = true
-        panel.begin { [weak self] response in
+        panel.beginSheetModal(for: window) { [weak self] response in
             guard let self else { return }
             self.isPanelPresented = false
             if response == .OK { self.importFiles(panel.urls) }
@@ -132,7 +136,7 @@ final class BloomModel {
     }
 
     func chooseExport() {
-        guard result != nil, !isBusy, !isPanelPresented else { return }
+        guard result != nil, !isBusy, !isPanelPresented, let window = presentationWindow else { return }
         let panel = NSSavePanel()
         panel.title = "Export your bloom"
         panel.nameFieldStringValue = "ByteBloom.png"
@@ -140,7 +144,7 @@ final class BloomModel {
         panel.canCreateDirectories = true
         panel.message = "2048 × 2048 pixels · opaque sRGB PNG"
         isPanelPresented = true
-        panel.begin { [weak self] response in
+        panel.beginSheetModal(for: window) { [weak self] response in
             guard let self else { return }
             self.isPanelPresented = false
             if response == .OK, let url = panel.url { self.export(to: url) }
