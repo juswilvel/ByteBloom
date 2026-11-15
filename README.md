@@ -10,23 +10,18 @@ happens locally with Apple frameworks and no third-party dependencies.
 
 ## Download and installation
 
-The public v0.1.0 release currently contains source ZIP and tar.gz archives.
-A downloadable installer for v0.1.1 is being prepared for owner review.
-The current QA DMG uses ad-hoc signing and has not been notarized. It is for
-local testing only. Public binary distribution requires Developer ID signing,
-Apple notarization, and separate release approval.
+The public v0.1.0 release contains GitHub’s source ZIP and tar.gz archives.
+The proposed v0.1.1 release would add a separate
+`ByteBloom-0.1.1-macOS-UNNOTARIZED.dmg` asset **after verification and owner
+approval**. The installer is pending publication.
 
-The planned release will attach `ByteBloom-0.1.1-macOS.dmg` alongside GitHub's
-source ZIP and tar.gz archives. Once that installer is published and verified:
-
-1. Download the DMG from the GitHub release.
-2. Open the DMG.
-3. Drag ByteBloom to Applications.
-4. Launch ByteBloom from Applications.
-
-For local owner testing, use `~/Applications/ByteBloom.app` as the canonical
-copy. Launching copies under Xcode's Debug or Release folders can create
-duplicate search results. See [v0.1.1 verification](docs/VERIFICATION-0.1.1.md).
+The candidate is ad-hoc signed and has no Apple notarization or Developer ID
+publisher verification. Once published, download the DMG, verify its SHA-256,
+open it, drag ByteBloom to Applications, and launch it there. Expect a
+first-launch warning. If you trust the source and the download matches, follow
+[Apple’s Privacy & Security → Open Anyway procedure](https://support.apple.com/en-us/102445).
+See the full [installation guide](docs/INSTALL-UNNOTARIZED.md) for details,
+including the source-build alternative.
 
 ## Use ByteBloom
 
@@ -110,8 +105,8 @@ xcodebuild -project ByteBloom.xcodeproj -scheme ByteBloom \
 open /tmp/ByteBloom-build/Build/Products/Debug/ByteBloom.app
 ```
 
-Build ByteBloom from source. Prebuilt and notarized application
-binaries are not included.
+Building from source is available independently of the DMG. The public
+v0.1.0 release contains source archives only.
 
 ## Tests and review
 

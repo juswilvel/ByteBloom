@@ -83,3 +83,23 @@ copy into ~/Applications/ByteBloom.app. A durable recovery ZIP also lives at ~/A
 Review files, DMG, checksum, screenshot, logs, and draft notes are outside the
 repository under /tmp/ByteBloom-0.1.1-review. The final package is in its final subdirectory.
 No binaries are committed.
+
+## Unnotarized distribution candidate
+
+The owner authorized a separately labeled unnotarized DMG for distribution
+testing. `scripts/package-unnotarized.sh` packages the existing universal
+Release build with an Applications shortcut and the
+[installation guide](INSTALL-UNNOTARIZED.md). The original local QA package
+remains separate.
+
+The complete test suite rerun passed 24 tests, including the unchanged
+deterministic golden tests. A fresh universal Release build succeeded.
+The candidate disk image passed integrity verification. Its app has a valid
+ad-hoc signature, Hardened Runtime, App Sandbox, and user-selected read/write
+access. The binary contains arm64 and x86_64 and declares macOS 14.0.
+
+On macOS 27.2.1 (Apple silicon), a disposable installation from a simulated
+quarantined download was blocked. System Settings displayed **Open Anyway** for
+that copy. Successful first launch through that procedure, subsequent launch,
+and import/export on the quarantined copy must be verified before distribution.
+The earlier local QA launch and export are separate evidence.
