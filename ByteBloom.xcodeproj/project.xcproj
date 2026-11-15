@@ -1,0 +1,69 @@
+{
+  "default-configuration": "Release",
+  "configurations": [
+    "Debug",
+    "Release",
+  ],
+  "localizations": {
+    "development": "en",
+    "supported": [
+      "Base",
+    ],
+  },
+  "files": [
+    {
+      "kind": "group",
+      "name": "Products",
+      "children": [
+        { "path": "<PRODUCTS>/ByteBloom.app", "id": "308064C830A974D4008C4B84", "type": "wrapper.application", "index": false },
+        { "path": "<PRODUCTS>/ByteBloomTests.xctest", "id": "3090F38F30A974D90019DAE7", "type": "wrapper.cfbundle", "index": false },
+      ],
+    },
+    { "kind": "folder", "path": "ByteBloom", "target-membership": [ "ByteBloom" ] },
+    { "kind": "folder", "path": "ByteBloomTests", "target-membership": [ "ByteBloomTests" ] },
+  ],
+  "targets": [
+    {
+      "name": "ByteBloom",
+      "id": "308064C730A974D4008C4B84",
+      "product": "Products/ByteBloom.app",
+      "product-type": "application",
+      "build-phases": [
+        "compile-sources",
+        "frameworks",
+        "resources",
+      ],
+      "build-settings": {
+        "CODE_SIGN_ENTITLEMENTS": "ByteBloom/ByteBloom.entitlements",
+        "ENABLE_APP_SANDBOX": "YES",
+        "GENERATE_INFOPLIST_FILE": "YES",
+        "PRODUCT_BUNDLE_IDENTIFIER": "com.juswilvel.ByteBloom",
+        "PRODUCT_NAME": "$(TARGET_NAME)",
+      },
+    }, {
+      "name": "ByteBloomTests",
+      "id": "3090F38E30A974D90019DAE7",
+      "product": "Products/ByteBloomTests.xctest",
+      "product-type": "bundle.unit-test",
+      "dependencies": [
+        "ByteBloom",
+      ],
+      "build-phases": [
+        "compile-sources",
+      ],
+      "build-settings": {
+        "BUNDLE_LOADER": "$(TEST_HOST)",
+        "GENERATE_INFOPLIST_FILE": "YES",
+        "PRODUCT_BUNDLE_IDENTIFIER": "com.juswilvel.ByteBloomTests",
+        "PRODUCT_NAME": "$(TARGET_NAME)",
+        "TEST_HOST": "$(BUILT_PRODUCTS_DIR)/ByteBloom.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ByteBloom",
+      },
+    },
+  ],
+  "build-settings": {
+    "ENABLE_TESTABILITY[config=Debug]": "YES",
+    "MACOSX_DEPLOYMENT_TARGET": "14.0",
+    "SDKROOT": "macosx",
+    "SWIFT_VERSION": "6.0",
+  },
+}

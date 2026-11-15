@@ -1,0 +1,58 @@
+# ByteBloom: Decision Log
+
+Authority: Foundational Project Blueprint v1.0.
+Approved: November 14, 2026.
+
+| ID | Decision | Status |
+|---|---|---|
+| D-001 | Name ByteBloom; tagline "Every file has a hidden beauty." | Approved |
+| D-002 | Native offline single-file macOS application | Approved |
+| D-003 | Luminous Botanical Rosette with filaments | Approved |
+| D-004 | SwiftUI, Core Graphics, CryptoKit | Approved |
+| D-005 | Versioned deterministic bloom algorithm | Approved |
+| D-006 | 512 MiB maximum file size | Approved |
+| D-007 | Opaque 2048 x 2048 PNG export | Approved |
+| D-008 | Public source-only first release | Approved |
+| D-009 | Codex as sole primary implementation agent | Approved |
+| D-010 | juswilvel/ByteBloom; MIT license | Approved |
+| D-011 | Private GitHub repository before release | Approved |
+| D-012 | macOS 14 minimum deployment target | Confirmed |
+| D-013 | Built-in frameworks; no paid services or dependencies | Approved |
+| D-014 | Prebuilt Mac app distribution postponed | Approved |
+| D-015 | Native Xcode JSON project format | Bootstrapped |
+
+## Verified development environment
+
+- Apple silicon MacBook Pro.
+- macOS 27.2.1.
+- Xcode 27.2, build 27B52.
+- Swift compiler 6.4.2.
+- Swift language mode 6.
+- macOS SDK 27.2.
+- Minimum deployment target 14.0.
+- GitHub account juswilvel.
+
+## Architectural principles
+
+Keep file access, binary analysis, parameter generation,
+rendering, and presentation logically separate.
+
+Freeze the exact bloom-v1 numerical mappings and seed
+conventions after their initial tests are accepted.
+
+Do not rewrite established functional components without
+a demonstrated technical reason.
+
+No third-party dependency, service, external API, cost,
+or material scope change without owner approval.
+
+## Current phase
+
+Foundation bootstrap only. Application feature implementation
+requires separate authorization.
+
+Public visibility and v0.1.0 release require separate
+explicit approval.
+
+Future decisions should be recorded here only when
+they materially affect the product or architecture.
