@@ -7,14 +7,26 @@ enum FileAccess {
         _ url: URL,
         progress: @escaping @Sendable (UInt64) -> Void = { _ in }
     ) async throws -> BinaryAnalysis {
+        try await analyzeSource(url, progress: progress).analysis
+    }
+
+    static func analyzeSource(
+        _ url: URL,
+        progress: @escaping @Sendable (UInt64) -> Void = { _ in }
+    ) async throws -> AnalyzedFile {
         let worker = Task.detached(priority: .userInitiated) {
             try Task.checkCancellation()
             let scoped = url.startAccessingSecurityScopedResource()
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
             return try withReadableFile(url) { handle, size in
-                try BinaryAnalyzer.analyze(expectedByteCount: size, readChunk: {
+                let identity = FileIdentity(try snapshot(handle.fileDescriptor))
+                let source = SourceFile(url: url,
+                                        canonicalPath: url.resolvingSymlinksInPath().standardizedFileURL.path,
+                                        identity: identity)
+                let analysis = try BinaryAnalyzer.analyze(expectedByteCount: size, readChunk: {
                     try handle.read(upToCount: $0) ?? Data()
                 }, progress: progress)
+                return AnalyzedFile(analysis: analysis, source: source)
             }
         }
         return try await withTaskCancellationHandler {

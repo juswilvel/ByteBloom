@@ -48,6 +48,16 @@ or material scope change without owner approval.
 
 ## Current phase
 
+The owner formally accepted the refined Luminous Botanical Rosette and
+froze the `bloom-v1` parameter mapping at commit
+`aa373d1790184ff8044b1278bbb7def085719cce`. Phases E–G (native UI,
+import, export, verification, and release-candidate documentation) are
+authorized. Changes to the frozen mapping require explicit approval and
+appropriate algorithm versioning. Publication and release are not authorized.
+
+The checkpoint entries below are historical; their pending approval gates
+were satisfied by this acceptance.
+
 The owner's implementation kickoff authorized Phases A–D on
 November 14, 2026. Binary analysis, deterministic parameters, and
 the Core Graphics renderer are implemented on the feature branch.
