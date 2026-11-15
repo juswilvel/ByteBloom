@@ -2,11 +2,57 @@
 
 ![ByteBloom v0.1.0 launch artwork with a luminous blue bloom beside the tagline “Every file has a hidden beauty.”](docs/assets/bytebloom-launch-hero.png)
 
-ByteBloom v0.1.0 is a native macOS application that turns a file's complete binary
+ByteBloom is a native macOS application that turns a file's complete binary
 contents into deterministic, luminous botanical artwork. All processing
 happens locally with Apple frameworks and no third-party dependencies.
 
 ![ByteBloom running on macOS, showing a jade bloom generated from sample.txt and controls to choose another file, explore its bytes, or export a PNG.](docs/assets/bytebloom-macos-screenshot.jpg)
+
+## Download and installation
+
+The public v0.1.0 release currently contains source ZIP and tar.gz archives.
+A downloadable installer for v0.1.1 is being prepared for owner review.
+The current QA DMG uses ad-hoc signing and has not been notarized. It is for
+local testing only. Public binary distribution requires Developer ID signing,
+Apple notarization, and separate release approval.
+
+The planned release will attach `ByteBloom-0.1.1-macOS.dmg` alongside GitHub's
+source ZIP and tar.gz archives. Once that installer is published and verified:
+
+1. Download the DMG from the GitHub release.
+2. Open the DMG.
+3. Drag ByteBloom to Applications.
+4. Launch ByteBloom from Applications.
+
+For local owner testing, use `~/Applications/ByteBloom.app` as the canonical
+copy. Launching copies under Xcode's Debug or Release folders can create
+duplicate search results. See [v0.1.1 verification](docs/VERIFICATION-0.1.1.md).
+
+## Use ByteBloom
+
+1. Launch the app. The welcome artwork is explicitly labeled as a synthetic
+   demonstration, not an analyzed user file.
+2. Choose a file with **Choose a File…** (`⌘O`), or drag one file from Finder
+   into the window. Files must be locally available regular files from
+   1 byte through 512 MiB. Folders, apps, aliases, and symlinks are rejected.
+3. Watch analysis progress or cancel. Selecting another file cancels prior
+   analysis. Failed or canceled imports preserve the previous successful bloom.
+4. Open **Explore the Bytes** for exact size, Shannon entropy, a 16-bin byte
+   histogram, and the SHA-256 fingerprint. Details scroll when space is tight;
+   statistics adapt to the available width. The copy button copies all 64 hex
+   characters. With Full Keyboard Access enabled, use Tab/Shift-Tab to move
+   among controls and Space to activate them.
+5. Choose **How this bloom works** for a one-click explanation of the selected
+   palette and how the file shapes its bloom. Press Escape or Done to dismiss.
+6. Choose **Export PNG…** (`⇧⌘S`). The native save dialog defaults to
+   `ByteBloom.png`. Output is an opaque, sRGB, 2048 × 2048 PNG using the same
+   normalized composition as the preview. Existing unrelated files require
+   the save panel's replacement confirmation. The source file is protected,
+   including matching hard-link identity; alias/symlink destinations are rejected.
+
+An export canceled before writing leaves the destination unchanged. If its
+atomic save has already begun, a completed save reports success. Save errors
+are recoverable and the bloom remains available for another attempt.
 
 ## How it works
 
@@ -32,31 +78,7 @@ image-generation service.
 Different files can produce similar-looking blooms, and PNG bytes may vary
 across macOS versions.
 
-## Use ByteBloom
-
-1. Launch the app. The welcome artwork is explicitly labeled as a synthetic
-   demonstration, not an analyzed user file.
-2. Choose a file with **Choose a File…** (`⌘O`), or drag one file from Finder
-   into the window. Files must be locally available regular files from
-   1 byte through 512 MiB. Folders, apps, aliases, and symlinks are rejected.
-3. Watch analysis progress or cancel. Selecting another file cancels prior
-   analysis. Failed or canceled imports preserve the previous successful bloom.
-4. Open **Explore the Bytes** for exact size, Shannon entropy, a 16-bin byte
-   histogram, and the SHA-256 fingerprint. Details scroll when space is tight;
-   statistics adapt to the available width. The copy button copies all 64 hex
-   characters. With Full Keyboard Access enabled, use Tab/Shift-Tab to move
-   among controls and Space to activate them.
-5. Choose **Export PNG…** (`⇧⌘S`). The native save dialog defaults to
-   `ByteBloom.png`. Output is an opaque, sRGB, 2048 × 2048 PNG using the same
-   normalized composition as the preview. Existing unrelated files require
-   the save panel's replacement confirmation. The source file is protected,
-   including matching hard-link identity; alias/symlink destinations are rejected.
-
-An export canceled before writing leaves the destination unchanged. If its
-atomic save has already begun, a completed save reports success. Save errors
-are recoverable and the bloom remains available for another attempt.
-
-## Build and run
+## Build from source
 
 The configured application deployment target is **macOS 14.0**. Runtime
 compatibility on macOS 14 has not yet been independently verified.

@@ -152,3 +152,17 @@ The repository retains the Xcode 27+ JSON `.xcproj` format and macOS 14.0
 deployment target. README distinguishes the build Mac/Xcode requirements
 from unverified macOS 14 runtime compatibility. Final owner review, repository
 visibility changes, merges, and publication remain separate gates.
+
+### v0.1.1 owner-authorized improvement cycle
+
+The owner authorized a native AppIcon, a one-click result explanation, version
+0.1.1/build 2, installation investigation, and DMG preparation. This extends
+the v0.1.0 source-only scope for review. The frozen bloom-v1 generator and
+renderer remain the artwork contract. Public binary distribution and merging
+this feature branch require separate approval.
+
+The icon uses the approved Moonflower blue synthetic sample, framed and
+downsampled with Core Graphics. Design/AppIcon-Master.png is its editable source.
+The result explanation uses a native popover with scrollable native text.
+No valid code-signing identities were found on the development Mac. Packaging
+therefore produces an ad-hoc signed local QA DMG, without notarization.

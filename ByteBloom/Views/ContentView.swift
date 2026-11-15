@@ -5,6 +5,7 @@ struct ContentView: View {
     @Bindable var model: BloomModel
     @State private var targeted = false
     @State private var exploring = false
+    @State private var explaining = false
     private let accent = Color(red: 0.67, green: 0.84, blue: 0.77)
     private let background = Color(red: 0.026, green: 0.043, blue: 0.060)
 
@@ -169,6 +170,13 @@ struct ContentView: View {
             ViewThatFits(in: .horizontal) {
                 HStack { resultSummary(result); Spacer(minLength: 24); exploreButton }
                 VStack(alignment: .leading, spacing: 12) { resultSummary(result); exploreButton }
+            }
+            Button("How this bloom works", systemImage: "info.circle") {
+                explaining = true
+            }
+            .accessibilityHint("Explains how file contents shape this bloom.")
+            .popover(isPresented: $explaining) {
+                BloomExplanation(paletteName: BloomRenderer.palettes[result.parameters.palette].name)
             }
             if exploring {
                 ByteDetails(analysis: result.file.analysis, copy: model.copyFingerprint)
