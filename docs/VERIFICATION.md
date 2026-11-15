@@ -1,8 +1,9 @@
 # v0.1.0 release-candidate verification
 
-Status: private release candidate. The owner provisionally accepted core
-functionality; final layout/accessibility acceptance remains pending. No release,
-publication, merge to main, or visibility change is authorized.
+Status: private v0.1.0 release candidate at the merge-authorization checkpoint.
+The final source review passed, and the owner completed the manual checks below.
+The tested application revision is `b2a7080`. This documentation update does not
+change the application, project configuration, or tests.
 
 ## Baseline and frozen artwork
 
@@ -113,15 +114,15 @@ support: System Settings lists supported apps, and ByteBloom is not listed.
 | Tab order | Choose Another File → Export → Dismiss when present → Explore → Copy; reverse navigation exercised |
 | Space activation | Welcome picker, Export, Explore, Copy, and Dismiss exercised successfully |
 | Native dialogs | Keyboard-only path entry/import and PNG save; Escape canceled save successfully |
-| Focus indicators | Focus targets verified through accessibility state; the system focus overlay is not captured reliably by the app-only screenshot tool, so visual confirmation remains manual |
+| Focus indicators | Focus targets verified through accessibility state; the system focus overlay is not captured reliably by the app-only screenshot tool, so Codex verified focus targets only |
 | Artwork semantics | Image role and botanical/demo description present in the final accessibility tree |
 | Disclosure and copy | Expanded/Collapsed value and full-fingerprint action name inspected |
 | Statistics/histogram | Exact metric values and 16 individually labeled count elements inspected, including zero bins |
 | Error/completion feedback | Visible and accessible text verified; native announcement requests implemented |
-| VoiceOver | Enable/disable attempted through System Settings; the control interface could not verify an active spoken/caption session. Spoken output and announcement timing are **not marked passed**. Original off state restored |
+| VoiceOver | Enable/disable attempted through System Settings; the control interface could not verify an active spoken/caption session. Codex did not verify spoken output or announcement timing. Original off state restored |
 | Enlarged text | Temporary font stress build passed at minimum width; not a global text-size support claim |
 | Import/error/export | Synthetic imports, empty-file recovery, full fingerprint copy, native PNG export, and save cancellation rechecked |
-| Finder drag regression | Two cross-window attempts through the control interface did not complete. Owner's preceding manual pass is retained; this refinement needs a brief owner recheck |
+| Finder drag regression | Two cross-window attempts through the control interface did not complete. Codex did not independently confirm this regression check |
 
 Final signed Debug build/test: **24 tests, zero failures**. Existing analyzer,
 generator, renderer, file-access, cancellation, replacement, and export tests
@@ -139,16 +140,23 @@ identical to the previously accepted export for the same synthetic input:
 `16cf672a81c787598e3ef13ec7c088dc9ccf54dcd0709ec9f54e70494496c2b9`.
 Generator and renderer remain byte-for-byte unchanged from `aa373d1`.
 
-## Owner checks still required
+## Owner-reported manual checks
 
-- Listen with VoiceOver to the artwork description, disclosure state, all
-  histogram groups, and error/save/copy announcements; inspect focus visibility.
-- Briefly recheck Finder drag-and-drop after the scrolling/layout change.
-- Evaluate final product polish and representative keyboard use. A complete
-  assistive-technology usability audit is not claimed.
-- Provider/removable-volume behavior and actual macOS 14 runtime compatibility
-  remain unverified; the deployment target alone does not prove compatibility.
-- Final owner release acceptance and publication remain separate approvals.
+The owner reported these results for the final release candidate. They are
+separate from the automated Xcode suite and Codex’s runtime observations above.
+
+| Manual check | Owner-reported result |
+|---|---|
+| Visible keyboard focus | PASS |
+| VoiceOver accessibility | PASS |
+| Finder drag-and-drop regression | PASS |
+
+## Remaining limitations
+
+- Runtime compatibility on macOS 14 has not been independently verified.
+- External file-provider and removable-volume behavior has not been
+  comprehensively tested.
+- The manual checks do not constitute comprehensive accessibility certification.
 
 ## Reproducible owner walkthrough
 

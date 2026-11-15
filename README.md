@@ -8,12 +8,13 @@ happens locally with Apple frameworks and no third-party dependencies.
 
 ## Status
 
-**v0.1.0 release candidate — private owner review, not released.**
+**v0.1.0 release candidate — private pre-merge review, not released.**
 
 The native import, analysis, artwork, byte exploration, and PNG export
 workflow is implemented. The owner accepted the refined six-sample artwork
 and froze `bloom-v1` at commit `aa373d1`. The repository remains private;
-publication and final release acceptance require separate owner approval.
+the final source review and owner manual checks have passed. A private merge
+and public source release require separate owner authorization.
 
 ## Use ByteBloom
 
@@ -92,9 +93,8 @@ and source protection across hard links, symlinks, and Finder aliases.
 Tests create only synthetic temporary files, including sparse size-limit fixtures.
 
 See [release-candidate verification](docs/VERIFICATION.md) for executed UI
-checks and the remaining owner checks. Automated results do not constitute
-final visual or release acceptance. macOS 14 compatibility still needs a run
-on that OS; the development machine runs macOS 27.2.1.
+checks, owner-reported manual results, and remaining limitations. macOS 14
+compatibility has not been independently verified.
 
 ## Privacy and interpretation
 
