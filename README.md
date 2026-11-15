@@ -6,6 +6,30 @@ ByteBloom v0.1.0 is a native macOS application that turns a file's complete bina
 contents into deterministic, luminous botanical artwork. All processing
 happens locally with Apple frameworks and no third-party dependencies.
 
+## How it works
+
+**Is it random?** No. ByteBloom reads the file's bytes and uses measurements of
+those bytes to set the artwork parameters. Identical contents produce identical
+`bloom-v1` parameters under the same algorithm version, even if the files have
+different names.
+
+**Why do blooms look different?** Four properties influence the artwork:
+
+| File property | What it influences |
+| --- | --- |
+| SHA-256 fingerprint, a digest calculated from the whole file | Palette, orientation, petal count, and fine variations |
+| File size | How large the bloom grows within a fixed range |
+| Byte frequencies, or how often each byte value occurs | Petal contours and veins |
+| Shannon entropy, a measure of how evenly byte values are distributed | Filament density and texture |
+
+**How are colors chosen?** The fingerprint selects one of four curated
+palettes. Even for an image file, ByteBloom works from the encoded bytes
+without sampling visible colors. The app draws blooms locally without an AI
+image-generation service.
+
+Different files can produce similar-looking blooms, and PNG bytes may vary
+across macOS versions.
+
 ## Use ByteBloom
 
 1. Launch the app. The welcome artwork is explicitly labeled as a synthetic
