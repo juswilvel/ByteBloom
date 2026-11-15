@@ -115,3 +115,25 @@ explicit approval.
 
 Future decisions should be recorded here only when
 they materially affect the product or architecture.
+
+### Phases E–G: native integration and private release candidate
+
+- A single SwiftUI Window presents welcome/demo, analysis/rendering, result,
+  recoverable notices, byte exploration, and export. Window-attached native open/save panels
+  and a URL drop destination feed one main-actor state model.
+- A generation counter prevents stale analysis/progress from replacing the
+  current result. Streaming, parameter generation, rendering, and PNG writing
+  run on cancellable detached workers. Only measured/derived results remain
+  in memory; no persistent file history or source-data cache was added.
+- FileAccess captures device/inode identity from the open read-only descriptor.
+  It is used solely for export protection, never for artwork. Export rejects
+  the source path/identity and alias/symlink destinations, revalidates the
+  destination after rendering, and writes atomically under NSFileCoordinator.
+- Cancellation is checked immediately before the atomic write. A write already
+  committed reports success rather than claiming that an existing output was canceled.
+- Project signing defaults to ad-hoc Sign to Run Locally with App Sandbox,
+  without an environment-specific team identity. Version 0.1.0/build 1 is a
+  private release candidate, not a public release or notarized distribution.
+- docs/VERIFICATION.md separates actual signed-app interactions, automated
+  checks, and outstanding owner acceptance items. The frozen generator and
+  renderer remain byte-for-byte unchanged from aa373d1.

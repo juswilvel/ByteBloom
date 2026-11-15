@@ -2,113 +2,112 @@
 
 **Every file has a hidden beauty.**
 
-ByteBloom is an open-source native macOS application that
-transforms the binary contents of a file into deterministic,
-luminous botanical artwork.
+ByteBloom is a native macOS application that turns a file's complete binary
+contents into deterministic, luminous botanical artwork. All processing
+happens locally with Apple frameworks and no third-party dependencies.
 
-Drop a file, discover its bloom, explore the underlying byte
-statistics, and export the result as a high-quality PNG.
+## Status
 
-## Project status
+**v0.1.0 release candidate — private owner review, not released.**
 
-**Core pipeline implemented. Refined artwork review pending.**
+The native import, analysis, artwork, byte exploration, and PNG export
+workflow is implemented. The owner accepted the refined six-sample artwork
+and froze `bloom-v1` at commit `aa373d1`. The repository remains private;
+publication and final release acceptance require separate owner approval.
 
-The application still presents the foundation placeholder. The
-streaming analyzer, read-only file-access boundary, deterministic
-`bloom-v1` parameter generator, and native Core Graphics renderer
-are implemented and tested. Preview and 2048-pixel rendering use
-the same normalized geometry.
+## Use ByteBloom
 
-The six-sample gallery must receive explicit owner approval before
-the full SwiftUI import workflow and native PNG export integration
-proceed. This is not a completed v0.1.0 application or public release.
+1. Launch the app. The welcome artwork is explicitly labeled as a synthetic
+   demonstration, not an analyzed user file.
+2. Choose a file with **Choose a File…** (`⌘O`), or drag one file from Finder
+   into the window. Files must be locally available regular files from
+   1 byte through 512 MiB. Folders, apps, aliases, and symlinks are rejected.
+3. Watch analysis progress or cancel. Selecting another file cancels prior
+   analysis. Failed or canceled imports preserve the previous successful bloom.
+4. Open **Explore the Bytes** for exact size, Shannon entropy, a 16-bin byte
+   histogram, and the SHA-256 fingerprint. The copy button copies all 64 hex
+   characters.
+5. Choose **Export PNG…** (`⇧⌘S`). The native save dialog defaults to
+   `ByteBloom.png`. Output is an opaque, sRGB, 2048 × 2048 PNG using the same
+   normalized composition as the preview. Existing unrelated files require
+   the save panel's replacement confirmation. The source file is protected,
+   including matching hard-link identity; alias/symlink destinations are rejected.
 
-The first focused artwork refinement adds directional lighting, a luminous
-seed core, clearer filaments, and bounded content-derived shape variation.
-The candidate mapping changes are documented in the decision log; the
-original gallery remains available for comparison during owner review.
+An export canceled before writing leaves the destination unchanged. If its
+atomic save has already begun, a completed save reports success. Save errors
+are recoverable and the bloom remains available for another attempt.
 
-The initial public release will provide source code and
-documented build instructions. A prebuilt Mac app is deferred.
+## Build and run
 
-## Planned features
+Requires full Xcode on macOS. The project targets **macOS 14.0 or newer**, uses
+Swift 6, and is verified with Xcode 27.2 / Swift compiler 6.4.2 on macOS 27.2.1.
+There are no package installation or service setup steps.
 
-- Native, lightweight macOS interface.
-- Drag-and-drop and native file selection.
-- Local SHA-256, histogram, and entropy analysis.
-- Deterministic content-derived botanical artwork.
-- Compact educational byte statistics.
-- 2048 x 2048 PNG export.
-- Offline processing with no analytics or telemetry.
+While the repository is private, cloning requires authorized GitHub access:
 
-## Requirements
+```sh
+git clone https://github.com/juswilvel/ByteBloom.git
+cd ByteBloom
+git switch feature/bytebloom-v0.1.0
+```
 
-- Mac running macOS 14.0 or newer for the deployment target.
-- Compatible full Xcode installation for building.
-- Development environment verified with Xcode 27.2.
+Open `ByteBloom.xcodeproj`, select the **ByteBloom** scheme and **My Mac**,
+then press **Run** (`⌘R`). The project uses **Sign to Run Locally** (ad-hoc
+signing), so an Apple Developer account is not required for local evaluation.
+App Sandbox and user-selected read/write access remain enabled.
 
-## Build from source
+Alternatively, build and launch from Terminal:
 
-Clone:
+```sh
+xcodebuild -project ByteBloom.xcodeproj -scheme ByteBloom \
+  -configuration Debug -destination 'platform=macOS' \
+  -derivedDataPath /tmp/ByteBloom-build build
+open /tmp/ByteBloom-build/Build/Products/Debug/ByteBloom.app
+```
 
-    git clone https://github.com/juswilvel/ByteBloom.git
-    cd ByteBloom
+Ad-hoc signing is for local development. This is not a Developer ID signed,
+notarized, or distributed binary. The planned first public release is source
+code, not a prebuilt app.
 
-Open `ByteBloom.xcodeproj` in Xcode, select the ByteBloom
-scheme, and build the macOS application.
+## Tests and review
 
-Or verify compilation from Terminal:
+```sh
+xcodebuild -project ByteBloom.xcodeproj -scheme ByteBloom \
+  -configuration Debug -destination 'platform=macOS' \
+  -derivedDataPath /tmp/ByteBloom-build build test
+```
 
-    xcodebuild \
-      -project ByteBloom.xcodeproj \
-      -scheme ByteBloom \
-      -configuration Debug \
-      -destination 'generic/platform=macOS' \
-      CODE_SIGNING_ALLOWED=NO \
-      build
+The 24 tests cover streaming SHA-256 and entropy reference values, histograms,
+chunk boundaries, cancellation, file eligibility and change detection,
+frozen mapping goldens, deterministic rendering, opaque sRGB PNG output,
+preview/export composition, active import replacement, result preservation,
+and source protection across hard links, symlinks, and Finder aliases.
+Tests create only synthetic temporary files, including sparse size-limit fixtures.
 
-The command above verifies compilation without code signing.
-Running the sandboxed application may require appropriate
-development signing configuration.
+See [release-candidate verification](docs/VERIFICATION.md) for executed UI
+checks and the remaining owner checks. Automated results do not constitute
+final visual or release acceptance. macOS 14 compatibility still needs a run
+on that OS; the development machine runs macOS 27.2.1.
 
-Run the core tests on macOS:
+## Privacy and interpretation
 
-    xcodebuild \
-      -project ByteBloom.xcodeproj \
-      -scheme ByteBloom \
-      -configuration Debug \
-      -destination 'platform=macOS' \
-      CODE_SIGNING_ALLOWED=NO \
-      test
+- Source files are opened read-only and streamed in approximately 1 MiB chunks.
+  Raw source contents are not retained in the result or persisted.
+- Security-scoped access is balanced around file operations. No bookmarks,
+  file history, telemetry, analytics, or network entitlements are used.
+- Exported artwork contains no source filename, path, or fingerprint metadata.
+- Byte entropy measures byte-value distribution. It does not establish
+  randomness, compression, encryption, malware status, or security.
+- Equal bytes yield equal `bloom-v1` parameters. Visually unique artwork is
+  not guaranteed, nor is pixel-identical rendering/PNG encoding across OS versions.
+- Change detection during reading is best effort, not an atomic filesystem
+  snapshot. ByteBloom does not initiate cloud downloads; OS file-provider
+  synchronization is outside its offline-processing guarantee.
 
-Tests cover SHA-256 reference vectors, byte counts and entropy,
-chunk-boundary consistency, cancellation, file eligibility and
-change detection, SplitMix64 and numerical mapping golden values,
-render repeatability, PNG color/opacity, and normalized composition.
-Tests use generated synthetic data, never personal source files.
-
-`BloomGeneratorV1.swift` documents numerical mappings, digest byte
-ordering, seed derivation, and PRNG consumption. The candidate v1
-mapping is regression-tested but awaits the visual acceptance gate
-before being declared stable. Rasterized pixels and PNG encoding
-are not guaranteed identical across operating-system versions.
-
-## Design and documentation
+## Design and license
 
 - [MVP specification](docs/MVP.md)
-- [Architecture decisions](docs/DECISIONS.md)
+- [Architecture decisions and algorithm freeze](docs/DECISIONS.md)
 - [Coding-agent instructions](AGENTS.md)
-
-## Privacy
-
-ByteBloom is designed to process selected files locally,
-without uploading their contents or collecting analytics.
-
-It does not modify imported source files.
-
-Deterministic blooms are not security certificates or
-proof that two different files cannot yield similar artwork.
-
-## License
 
 MIT. See [LICENSE](LICENSE).
