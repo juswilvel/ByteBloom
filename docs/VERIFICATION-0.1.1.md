@@ -38,7 +38,7 @@ native text styles and a scrollable body with a persistent Done button.
 - DMG integrity verified, mounted, and its app copied to ~/Applications.
 - Existing v0.1.0 tag and release remain preserved.
 
-## Distribution blocker
+## Signing availability and distribution decision
 
 security find-identity reported zero valid code-signing identities. Developer ID
 Application signing capability is therefore unavailable on this Mac. notarytool
@@ -47,11 +47,12 @@ identity is missing. Enrollment status and stored notarization profiles remain
 unverified. No credentials were created or changed and no notarization request
 was submitted.
 
-The DMG is explicitly marked LOCAL-QA, signed ad-hoc, and not notarized.
-Gatekeeper assessment rejects it. It must not be presented as a trusted public
-installer. To proceed with public binary distribution, the owner needs a valid
-Developer ID Application certificate/private key and existing authorized
-notarization authentication.
+The original LOCAL-QA DMG used ad-hoc signing, and Gatekeeper rejected it.
+Developer ID signing and Apple notarization remain unavailable. The owner
+subsequently approved an explicitly labeled unnotarized DMG for distribution
+pending final publication approval. Apple has neither verified the publisher’s
+identity through Developer ID nor notarized the app. The manual Open Anyway
+test for the distribution candidate is documented below.
 
 ## Installation and duplicate inventory
 
@@ -78,10 +79,11 @@ copy into ~/Applications/ByteBloom.app. A durable recovery ZIP also lives at ~/A
 - Keyboard focus/Space activation, spoken VoiceOver behavior, enlarged-text
   settings, and a fresh Finder drag-and-drop regression check.
 - Intel execution, macOS 14 runtime, external providers and removable volumes.
-- Final icon and UI acceptance. Accessibility certification is not claimed.
+- Accessibility certification is not claimed. The owner approved the icon
+  and educational popover after independent candidate review.
 
 Review files, DMG, checksum, screenshot, logs, and draft notes are outside the
-repository under /tmp/ByteBloom-0.1.1-review. The final package is in its final subdirectory.
+repository. The earlier local QA artifacts are under /tmp/ByteBloom-0.1.1-review.
 No binaries are committed.
 
 ## Unnotarized distribution candidate
@@ -114,3 +116,12 @@ before/after file manifest confirmed the canonical installation was unchanged.
 This validates the disclosed Open Anyway path on the tested host. The DMG
 remains an unpublished candidate pending owner acceptance. macOS 14, Intel
 hardware, and managed-device policies were not tested.
+
+## Final guide repackaging
+
+The final candidate embeds the publication-ready installation guide. Its
+application bundle was compared file by file against the original tested DMG
+and the disposable installation. All bundle file bytes matched, strict
+signature verification passed, and the repackaged DMG passed integrity
+verification. The original test result applies to the identical app bundle.
+The repackaged archive has its own SHA-256 and remains unpublished.

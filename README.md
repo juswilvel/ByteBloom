@@ -12,14 +12,18 @@ happens locally with Apple frameworks and no third-party dependencies.
 
 The public v0.1.0 release contains GitHub’s source ZIP and tar.gz archives.
 The proposed v0.1.1 release would add a separate
-`ByteBloom-0.1.1-macOS-UNNOTARIZED.dmg` asset **after verification and owner
-approval**. The installer is pending publication.
+`ByteBloom-0.1.1-macOS-UNNOTARIZED.dmg` asset alongside GitHub’s source ZIP and tar.gz. The v0.1.1 installer is
+pending publication.
 
 The candidate is ad-hoc signed and has no Apple notarization or Developer ID
 publisher verification. Once published, download the DMG, verify its SHA-256,
 open it, drag ByteBloom to Applications, and launch it there. Expect a
 first-launch warning. If you trust the source and the download matches, follow
 [Apple’s Privacy & Security → Open Anyway procedure](https://support.apple.com/en-us/102445).
+This procedure worked on macOS 27.2.1 on Apple silicon and required owner
+authentication. The universal binary targets macOS 14.0. Runtime behavior
+on macOS 14, Intel hardware, and managed devices remains unverified.
+
 See the full [installation guide](docs/INSTALL-UNNOTARIZED.md) for details,
 including the source-build alternative.
 
