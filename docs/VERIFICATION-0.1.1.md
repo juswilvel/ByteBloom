@@ -1,4 +1,4 @@
-# v0.1.1 owner review
+# v0.1.1 release verification
 
 ## Implemented
 
@@ -49,8 +49,8 @@ was submitted.
 
 The original LOCAL-QA DMG used ad-hoc signing, and Gatekeeper rejected it.
 Developer ID signing and Apple notarization remain unavailable. The owner
-subsequently approved an explicitly labeled unnotarized DMG for distribution
-pending final publication approval. Apple has neither verified the publisher’s
+subsequently approved an explicitly labeled unnotarized DMG for the
+[v0.1.1 release](https://github.com/juswilvel/ByteBloom/releases/tag/v0.1.1). Apple has neither verified the publisher’s
 identity through Developer ID nor notarized the app. The manual Open Anyway
 test for the distribution candidate is documented below.
 
@@ -72,7 +72,7 @@ The existing installation was validated and preserved as both a recovery ZIP
 and a moved bundle under /tmp/ByteBloom-0.1.1-review before installing the DMG
 copy into ~/Applications/ByteBloom.app. A durable recovery ZIP also lives at ~/Applications/ByteBloom Recovery/ByteBloom-0.1.0.zip.
 
-## Remaining owner verification
+## Remaining verification limits
 
 - Visual icon checks in Dock, Spotlight, and Application Switcher. Dock tool
   inspection timed out.
@@ -113,9 +113,8 @@ authentication prompt. macOS kept its quarantine attribute and launched both
 instances through App Translocation. Gatekeeper remained enabled and a
 before/after file manifest confirmed the canonical installation was unchanged.
 
-This validates the disclosed Open Anyway path on the tested host. The DMG
-remains an unpublished candidate pending owner acceptance. macOS 14, Intel
-hardware, and managed-device policies were not tested.
+This validates the disclosed Open Anyway path on the tested host. macOS 14,
+Intel hardware, and managed-device policies were not tested.
 
 ## Final guide repackaging
 
@@ -124,4 +123,10 @@ application bundle was compared file by file against the original tested DMG
 and the disposable installation. All bundle file bytes matched, strict
 signature verification passed, and the repackaged DMG passed integrity
 verification. The original test result applies to the identical app bundle.
-The repackaged archive has its own SHA-256 and remains unpublished.
+The release archive is `ByteBloom-0.1.1-macOS-UNNOTARIZED.dmg` (2,490,536
+bytes). Its SHA-256 is
+`45b61abede4be9953ef6eeeb17af3250804ba64c7f028f21e20bfdb15b4b7017`.
+
+The full Xcode suite passed again for publication (24 tests, zero failures),
+and a fresh universal Release build passed. The checked release DMG uses the
+previously tested app bundle.

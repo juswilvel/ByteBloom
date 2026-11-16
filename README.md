@@ -8,24 +8,29 @@ happens locally with Apple frameworks and no third-party dependencies.
 
 ![ByteBloom running on macOS, showing a jade bloom generated from sample.txt and controls to choose another file, explore its bytes, or export a PNG.](docs/assets/bytebloom-macos-screenshot.jpg)
 
-## Download and installation
+## Download for Mac
 
-The public v0.1.0 release contains GitHub’s source ZIP and tar.gz archives.
-The proposed v0.1.1 release would add a separate
-`ByteBloom-0.1.1-macOS-UNNOTARIZED.dmg` asset alongside GitHub’s source ZIP and tar.gz. The v0.1.1 installer is
-pending publication.
+[ByteBloom v0.1.1 on GitHub](https://github.com/juswilvel/ByteBloom/releases/tag/v0.1.1)
+includes the **unnotarized** macOS installer and separate source ZIP and
+tar.gz archives.
 
-The candidate is ad-hoc signed and has no Apple notarization or Developer ID
-publisher verification. Once published, download the DMG, verify its SHA-256,
-open it, drag ByteBloom to Applications, and launch it there. Expect a
-first-launch warning. If you trust the source and the download matches, follow
-[Apple’s Privacy & Security → Open Anyway procedure](https://support.apple.com/en-us/102445).
-This procedure worked on macOS 27.2.1 on Apple silicon and required owner
-authentication. The universal binary targets macOS 14.0. Runtime behavior
-on macOS 14, Intel hardware, and managed devices remains unverified.
+1. Download [ByteBloom-0.1.1-macOS-UNNOTARIZED.dmg](https://github.com/juswilvel/ByteBloom/releases/download/v0.1.1/ByteBloom-0.1.1-macOS-UNNOTARIZED.dmg)
+   and compare its SHA-256 with the value below or the release’s checksum file.
+2. Open the DMG, drag **ByteBloom.app** to **Applications**, then eject the DMG.
+3. Launch ByteBloom from Applications. Expect a Gatekeeper warning. If you
+   trust the source and have verified the download, follow
+   [Apple’s Privacy & Security → Open Anyway procedure](https://support.apple.com/en-us/102445).
 
-See the full [installation guide](docs/INSTALL-UNNOTARIZED.md) for details,
-including the source-build alternative.
+SHA-256: `45b61abede4be9953ef6eeeb17af3250804ba64c7f028f21e20bfdb15b4b7017`
+
+The app is ad-hoc signed and lacks Developer ID verification and Apple
+notarization. The checksum checks archive integrity and does not verify the
+publisher. On macOS 27.2.1 on Apple silicon, Open Anyway required owner
+authentication, and a later launch did not repeat the warning.
+
+The app includes arm64 and x86_64 and targets macOS 14.0. Runtime compatibility
+on macOS 14, Intel hardware, and managed devices remains unverified. See the
+[installation guide](docs/INSTALL-UNNOTARIZED.md) or [build from source](#build-from-source).
 
 ## Use ByteBloom
 
@@ -88,10 +93,11 @@ requirement is separate from the application deployment target. Development
 is verified with Xcode 27.2 / Swift compiler 6.4.2 on macOS 27.2.1, using Swift 6.
 There are no package installation or service setup steps.
 
-Clone the source from the `main` branch:
+If you downloaded a source archive from the v0.1.1 release, extract it and
+open the project from that folder. To clone this specific version instead:
 
 ```sh
-git clone --branch main https://github.com/juswilvel/ByteBloom.git
+git clone --branch v0.1.1 https://github.com/juswilvel/ByteBloom.git
 cd ByteBloom
 ```
 
